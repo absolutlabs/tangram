@@ -67,7 +67,7 @@ function _extends() {
   return _extends.apply(this, arguments);
 }
 
-var version = "0.21.1";
+var version = "0.21.2";
 
 var version$1 = 'v' + version;
 
@@ -5443,15 +5443,15 @@ class DataSource {
     // than the current map zoom level – eg a zoom_offset of 1 would load z3 data at z4
 
     this.zoom_offset = config.zoom_offset != null ? config.zoom_offset : 0;
-
-    if (this.zoom_offset < 0) {
-      let msg = `Data source '${this.name}' zoom_offset must not be negative – setting to 0.`;
-      log({
-        level: 'warn',
-        once: true
-      }, msg);
-      this.zoom_offset = 0;
-    }
+    let msg = `Data source '${this.name}' zoom_offset = '${this.zoom_offset}' :)`;
+    log({
+      level: 'warn',
+      once: true
+    }, msg); // if (this.zoom_offset < 0) {
+    // let msg = `Data source '${this.name}' zoom_offset must not be negative – setting to 0.`;
+    // log({ level: 'warn', once: true }, msg);
+    //     this.zoom_offset = 0;
+    // }
 
     this.setTileSize(config.tile_size); // no tiles will be requested or displayed outside of these min/max values
 
@@ -41176,17 +41176,14 @@ const SceneLoader = {
 
   // Expand paths for fonts
   normalizeFonts(config, bundle) {
-    config.fonts = config.fonts || {};
+    config.fonts = config.fonts || {}; // Add scene base path for URL-based fonts (skip "external" fonts referencing CSS-loaded resources)
 
-    for (const family in config.fonts) {
-      if (Array.isArray(config.fonts[family])) {
-        config.fonts[family].forEach(face => {
-          face.url = face.url && bundle.urlFor(face.url);
-        });
-      } else {
-        const face = config.fonts[family];
-        face.url = face.url && bundle.urlFor(face.url);
-      }
+    const fonts = Object.values(config.fonts).filter(face => face !== 'external');
+
+    for (const face of fonts) {
+      const faces = Array.isArray(face) ? face : [face]; // can be single value or array
+
+      faces.forEach(face => face.url = bundle.urlFor(face.url));
     }
 
     return config;
@@ -44750,7 +44747,7 @@ return index;
 // Script modules can't expose exports
 try {
 	Tangram.debug.ESM = true; // mark build as ES module
-	Tangram.debug.SHA = '81ee5a1ddf14547d5653c42972e0a66fa999d545';
+	Tangram.debug.SHA = '19530b0de3c6547f9e14bfb8efbd3489256e1276';
 	if (true === true && typeof window === 'object') {
 	    window.Tangram = Tangram;
 	}
