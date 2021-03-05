@@ -136,7 +136,7 @@ Utils.serializeWithFunctions = function (obj) {
 Utils.use_high_density_display = true;
 Utils.updateDevicePixelRatio = function () {
     let prev = Utils.device_pixel_ratio;
-    Utils.device_pixel_ratio = (Utils.use_high_density_display && window.devicePixelRatio) || 1;
+    Utils.device_pixel_ratio = 2. * (Utils.use_high_density_display && window.devicePixelRatio) || 1;
     return Utils.device_pixel_ratio !== prev;
 };
 
