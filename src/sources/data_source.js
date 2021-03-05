@@ -52,9 +52,6 @@ export default class DataSource {
         // than the current map zoom level – eg a zoom_offset of 1 would load z3 data at z4
         this.zoom_offset = (config.zoom_offset != null) ? config.zoom_offset : 0;
         
-        let msg = `Data source '${this.name}' zoom_offset = '${this.zoom_offset}' :)`;
-        log({ level: 'warn', once: true }, msg);
-
         // if (this.zoom_offset < 0) {
             // let msg = `Data source '${this.name}' zoom_offset must not be negative – setting to 0.`;
             // log({ level: 'warn', once: true }, msg);

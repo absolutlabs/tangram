@@ -67,7 +67,7 @@ function _extends() {
   return _extends.apply(this, arguments);
 }
 
-var version = "0.21.2";
+var version = "0.21.4";
 
 var version$1 = 'v' + version;
 
@@ -5442,12 +5442,7 @@ class DataSource {
     this.setZooms(config); // set a custom extra overzoom adjustment factor to load consistently lower zoom levels
     // than the current map zoom level – eg a zoom_offset of 1 would load z3 data at z4
 
-    this.zoom_offset = config.zoom_offset != null ? config.zoom_offset : 0;
-    let msg = `Data source '${this.name}' zoom_offset = '${this.zoom_offset}' :)`;
-    log({
-      level: 'warn',
-      once: true
-    }, msg); // if (this.zoom_offset < 0) {
+    this.zoom_offset = config.zoom_offset != null ? config.zoom_offset : 0; // if (this.zoom_offset < 0) {
     // let msg = `Data source '${this.name}' zoom_offset must not be negative – setting to 0.`;
     // log({ level: 'warn', once: true }, msg);
     //     this.zoom_offset = 0;
@@ -17657,9 +17652,10 @@ function addDebugLayers(node, tree) {
   }
 }
 
+/*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 var read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m;
-  var eLen = nBytes * 8 - mLen - 1;
+  var eLen = (nBytes * 8) - mLen - 1;
   var eMax = (1 << eLen) - 1;
   var eBias = eMax >> 1;
   var nBits = -7;
@@ -17672,12 +17668,12 @@ var read = function (buffer, offset, isLE, mLen, nBytes) {
   e = s & ((1 << (-nBits)) - 1);
   s >>= (-nBits);
   nBits += eLen;
-  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+  for (; nBits > 0; e = (e * 256) + buffer[offset + i], i += d, nBits -= 8) {}
 
   m = e & ((1 << (-nBits)) - 1);
   e >>= (-nBits);
   nBits += mLen;
-  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+  for (; nBits > 0; m = (m * 256) + buffer[offset + i], i += d, nBits -= 8) {}
 
   if (e === 0) {
     e = 1 - eBias;
@@ -17692,7 +17688,7 @@ var read = function (buffer, offset, isLE, mLen, nBytes) {
 
 var write = function (buffer, value, offset, isLE, mLen, nBytes) {
   var e, m, c;
-  var eLen = nBytes * 8 - mLen - 1;
+  var eLen = (nBytes * 8) - mLen - 1;
   var eMax = (1 << eLen) - 1;
   var eBias = eMax >> 1;
   var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0);
@@ -17725,7 +17721,7 @@ var write = function (buffer, value, offset, isLE, mLen, nBytes) {
       m = 0;
       e = eMax;
     } else if (e + eBias >= 1) {
-      m = (value * c - 1) * Math.pow(2, mLen);
+      m = ((value * c) - 1) * Math.pow(2, mLen);
       e = e + eBias;
     } else {
       m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
@@ -21056,7 +21052,7 @@ function applyGlobalProperties(globals, obj, target, key) {
 
   let prop; // Check for previously applied global substitution
 
-  if (target == null ? void 0 : (_target$GLOBAL_REGIST2 = target[GLOBAL_REGISTRY]) == null ? void 0 : _target$GLOBAL_REGIST2[key]) {
+  if (target != null && (_target$GLOBAL_REGIST2 = target[GLOBAL_REGISTRY]) != null && _target$GLOBAL_REGIST2[key]) {
     prop = target[GLOBAL_REGISTRY][key];
   } // Check string for new global substitution
   else if (typeof obj === 'string' && obj.slice(0, GLOBAL_PREFIX_LENGTH) === GLOBAL_PREFIX) {
@@ -21356,11 +21352,6 @@ Buffer.TYPED_ARRAY_SUPPORT = global$1.TYPED_ARRAY_SUPPORT !== undefined
   ? global$1.TYPED_ARRAY_SUPPORT
   : true;
 
-/*
- * Export kMaxLength after typed array support is determined.
- */
-var _kMaxLength = kMaxLength();
-
 function kMaxLength () {
   return Buffer.TYPED_ARRAY_SUPPORT
     ? 0x7fffffff
@@ -21611,13 +21602,6 @@ function checked (length) {
                          'size: 0x' + kMaxLength().toString(16) + ' bytes')
   }
   return length | 0
-}
-
-function SlowBuffer (length) {
-  if (+length != length) { // eslint-disable-line eqeqeq
-    length = 0;
-  }
-  return Buffer.alloc(+length)
 }
 Buffer.isBuffer = isBuffer;
 function internalIsBuffer (b) {
@@ -23098,15 +23082,6 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isFastBuffer(obj.slice(0, 0))
 }
 
-var bufferEs6 = /*#__PURE__*/Object.freeze({
-__proto__: null,
-INSPECT_MAX_BYTES: INSPECT_MAX_BYTES,
-kMaxLength: _kMaxLength,
-Buffer: Buffer,
-SlowBuffer: SlowBuffer,
-isBuffer: isBuffer
-});
-
 var domain;
 
 // This constructor is used to store event handlers. Instantiating this is
@@ -23706,34 +23681,6 @@ function Item(fun, array) {
 Item.prototype.run = function () {
     this.fun.apply(null, this.array);
 };
-var title = 'browser';
-var platform = 'browser';
-var browser = true;
-var env = {};
-var argv = [];
-var version = ''; // empty string to avoid regexp issues
-var versions = {};
-var release = {};
-var config = {};
-
-function noop() {}
-
-var on = noop;
-var addListener = noop;
-var once = noop;
-var off = noop;
-var removeListener = noop;
-var removeAllListeners = noop;
-var emit = noop;
-
-function binding(name) {
-    throw new Error('process.binding is not supported');
-}
-
-function cwd () { return '/' }
-function chdir (dir) {
-    throw new Error('process.chdir is not supported');
-}function umask() { return 0; }
 
 // from https://github.com/kumavis/browser-process-hrtime/blob/master/index.js
 var performance = global$1.performance || {};
@@ -23745,67 +23692,10 @@ var performanceNow =
   performance.webkitNow  ||
   function(){ return (new Date()).getTime() };
 
-// generate timestamp or delta
-// see http://nodejs.org/api/process.html#process_process_hrtime
-function hrtime(previousTimestamp){
-  var clocktime = performanceNow.call(performance)*1e-3;
-  var seconds = Math.floor(clocktime);
-  var nanoseconds = Math.floor((clocktime%1)*1e9);
-  if (previousTimestamp) {
-    seconds = seconds - previousTimestamp[0];
-    nanoseconds = nanoseconds - previousTimestamp[1];
-    if (nanoseconds<0) {
-      seconds--;
-      nanoseconds += 1e9;
-    }
-  }
-  return [seconds,nanoseconds]
-}
-
-var startTime = new Date();
-function uptime() {
-  var currentTime = new Date();
-  var dif = currentTime - startTime;
-  return dif / 1000;
-}
-
-var process = {
-  nextTick: nextTick,
-  title: title,
-  browser: browser,
-  env: env,
-  argv: argv,
-  version: version,
-  versions: versions,
-  on: on,
-  addListener: addListener,
-  once: once,
-  off: off,
-  removeListener: removeListener,
-  removeAllListeners: removeAllListeners,
-  emit: emit,
-  binding: binding,
-  cwd: cwd,
-  chdir: chdir,
-  umask: umask,
-  hrtime: hrtime,
-  platform: platform,
-  release: release,
-  config: config,
-  uptime: uptime
-};
-
-var isBufferBrowser = function isBuffer(arg) {
-  return arg && typeof arg === 'object'
-    && typeof arg.copy === 'function'
-    && typeof arg.fill === 'function'
-    && typeof arg.readUInt8 === 'function';
-};
-
-var inherits_browser = sources.createCommonjsModule(function (module) {
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
+var inherits;
+if (typeof Object.create === 'function'){
+  inherits = function inherits(ctor, superCtor) {
+    // implementation from standard node.js 'util' module
     ctor.super_ = superCtor;
     ctor.prototype = Object.create(superCtor.prototype, {
       constructor: {
@@ -23817,8 +23707,7 @@ if (typeof Object.create === 'function') {
     });
   };
 } else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
+  inherits = function inherits(ctor, superCtor) {
     ctor.super_ = superCtor;
     var TempCtor = function () {};
     TempCtor.prototype = superCtor.prototype;
@@ -23826,32 +23715,10 @@ if (typeof Object.create === 'function') {
     ctor.prototype.constructor = ctor;
   };
 }
-});
-
-var util = sources.createCommonjsModule(function (module, exports) {
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
+var inherits$1 = inherits;
 
 var formatRegExp = /%[sdj%]/g;
-exports.format = function(f) {
+function format(f) {
   if (!isString(f)) {
     var objects = [];
     for (var i = 0; i < arguments.length; i++) {
@@ -23887,17 +23754,16 @@ exports.format = function(f) {
     }
   }
   return str;
-};
-
+}
 
 // Mark that a method should not be used.
 // Returns a modified function which warns once by default.
 // If --no-deprecation is set, then it is a no-op.
-exports.deprecate = function(fn, msg) {
+function deprecate(fn, msg) {
   // Allow for deprecating things in the process of starting up.
   if (isUndefined(global$1.process)) {
     return function() {
-      return exports.deprecate(fn, msg).apply(this, arguments);
+      return deprecate(fn, msg).apply(this, arguments);
     };
   }
 
@@ -23913,20 +23779,19 @@ exports.deprecate = function(fn, msg) {
   }
 
   return deprecated;
-};
-
+}
 
 var debugs = {};
 var debugEnviron;
-exports.debuglog = function(set) {
+function debuglog(set) {
   if (isUndefined(debugEnviron))
     debugEnviron =  '';
   set = set.toUpperCase();
   if (!debugs[set]) {
     if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
-      var pid = process.pid;
+      var pid = 0;
       debugs[set] = function() {
-        var msg = exports.format.apply(exports, arguments);
+        var msg = format.apply(null, arguments);
         console.error('%s %d: %s', set, pid, msg);
       };
     } else {
@@ -23934,8 +23799,7 @@ exports.debuglog = function(set) {
     }
   }
   return debugs[set];
-};
-
+}
 
 /**
  * Echos the value of a value. Trys to print the value out
@@ -23959,7 +23823,7 @@ function inspect(obj, opts) {
     ctx.showHidden = opts;
   } else if (opts) {
     // got an "options" object
-    exports._extend(ctx, opts);
+    _extend(ctx, opts);
   }
   // set default options
   if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
@@ -23969,8 +23833,6 @@ function inspect(obj, opts) {
   if (ctx.colors) ctx.stylize = stylizeWithColor;
   return formatValue(ctx, obj, ctx.depth);
 }
-exports.inspect = inspect;
-
 
 // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
 inspect.colors = {
@@ -24038,7 +23900,7 @@ function formatValue(ctx, value, recurseTimes) {
       value &&
       isFunction(value.inspect) &&
       // Filter out the util module, it's inspect function is special
-      value.inspect !== exports.inspect &&
+      value.inspect !== inspect &&
       // Also filter out any prototype objects using the circular check.
       !(value.constructor && value.constructor.prototype === value)) {
     var ret = value.inspect(recurseTimes, ctx);
@@ -24089,7 +23951,7 @@ function formatValue(ctx, value, recurseTimes) {
   var base = '', array = false, braces = ['{', '}'];
 
   // Make Array say that they are Array
-  if (isArray(value)) {
+  if (isArray$1(value)) {
     array = true;
     braces = ['[', ']'];
   }
@@ -24268,129 +24130,56 @@ function reduceToSingleString(output, base, braces) {
 
 // NOTE: These type checking functions intentionally don't use `instanceof`
 // because it is fragile and can be easily faked with `Object.create()`.
-function isArray(ar) {
+function isArray$1(ar) {
   return Array.isArray(ar);
 }
-exports.isArray = isArray;
 
 function isBoolean(arg) {
   return typeof arg === 'boolean';
 }
-exports.isBoolean = isBoolean;
 
 function isNull(arg) {
   return arg === null;
 }
-exports.isNull = isNull;
-
-function isNullOrUndefined(arg) {
-  return arg == null;
-}
-exports.isNullOrUndefined = isNullOrUndefined;
 
 function isNumber(arg) {
   return typeof arg === 'number';
 }
-exports.isNumber = isNumber;
 
 function isString(arg) {
   return typeof arg === 'string';
 }
-exports.isString = isString;
-
-function isSymbol(arg) {
-  return typeof arg === 'symbol';
-}
-exports.isSymbol = isSymbol;
 
 function isUndefined(arg) {
   return arg === void 0;
 }
-exports.isUndefined = isUndefined;
 
 function isRegExp(re) {
   return isObject(re) && objectToString(re) === '[object RegExp]';
 }
-exports.isRegExp = isRegExp;
 
 function isObject(arg) {
   return typeof arg === 'object' && arg !== null;
 }
-exports.isObject = isObject;
 
 function isDate(d) {
   return isObject(d) && objectToString(d) === '[object Date]';
 }
-exports.isDate = isDate;
 
 function isError(e) {
   return isObject(e) &&
       (objectToString(e) === '[object Error]' || e instanceof Error);
 }
-exports.isError = isError;
 
 function isFunction(arg) {
   return typeof arg === 'function';
 }
-exports.isFunction = isFunction;
-
-function isPrimitive(arg) {
-  return arg === null ||
-         typeof arg === 'boolean' ||
-         typeof arg === 'number' ||
-         typeof arg === 'string' ||
-         typeof arg === 'symbol' ||  // ES6 symbol
-         typeof arg === 'undefined';
-}
-exports.isPrimitive = isPrimitive;
-
-exports.isBuffer = isBufferBrowser;
 
 function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 
-
-function pad(n) {
-  return n < 10 ? '0' + n.toString(10) : n.toString(10);
-}
-
-
-var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
-              'Oct', 'Nov', 'Dec'];
-
-// 26 Feb 16:19:34
-function timestamp() {
-  var d = new Date();
-  var time = [pad(d.getHours()),
-              pad(d.getMinutes()),
-              pad(d.getSeconds())].join(':');
-  return [d.getDate(), months[d.getMonth()], time].join(' ');
-}
-
-
-// log is just a thin wrapper to console.log that prepends a timestamp
-exports.log = function() {
-  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
-};
-
-
-/**
- * Inherit the prototype methods from one constructor into another.
- *
- * The Function.prototype.inherits from lang.js rewritten as a standalone
- * function (not on Function.prototype). NOTE: If this file is to be loaded
- * during bootstrapping this function needs to be rewritten using some native
- * functions as prototype setup using normal JavaScript does not work as
- * expected during bootstrapping (see mirror.js in r114903).
- *
- * @param {function} ctor Constructor function which needs to inherit the
- *     prototype.
- * @param {function} superCtor Constructor function to inherit prototype from.
- */
-exports.inherits = inherits_browser;
-
-exports._extend = function(origin, add) {
+function _extend(origin, add) {
   // Don't do anything if add isn't an object
   if (!add || !isObject(add)) return origin;
 
@@ -24400,34 +24189,10 @@ exports._extend = function(origin, add) {
     origin[keys[i]] = add[keys[i]];
   }
   return origin;
-};
-
+}
 function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
-});
-var util_1 = util.format;
-var util_2 = util.deprecate;
-var util_3 = util.debuglog;
-var util_4 = util.inspect;
-var util_5 = util.isArray;
-var util_6 = util.isBoolean;
-var util_7 = util.isNull;
-var util_8 = util.isNullOrUndefined;
-var util_9 = util.isNumber;
-var util_10 = util.isString;
-var util_11 = util.isSymbol;
-var util_12 = util.isUndefined;
-var util_13 = util.isRegExp;
-var util_14 = util.isObject;
-var util_15 = util.isDate;
-var util_16 = util.isError;
-var util_17 = util.isFunction;
-var util_18 = util.isPrimitive;
-var util_19 = util.isBuffer;
-var util_20 = util.log;
-var util_21 = util.inherits;
-var util_22 = util._extend;
 
 function BufferList() {
   this.head = null;
@@ -24485,346 +24250,209 @@ BufferList.prototype.concat = function (n) {
   return ret;
 };
 
-var safeBuffer = sources.createCommonjsModule(function (module, exports) {
-/* eslint-disable node/no-deprecated-api */
+// Copyright Joyent, Inc. and other Node contributors.
+var isBufferEncoding = Buffer.isEncoding
+  || function(encoding) {
+       switch (encoding && encoding.toLowerCase()) {
+         case 'hex': case 'utf8': case 'utf-8': case 'ascii': case 'binary': case 'base64': case 'ucs2': case 'ucs-2': case 'utf16le': case 'utf-16le': case 'raw': return true;
+         default: return false;
+       }
+     };
 
-var Buffer = bufferEs6.Buffer;
 
-// alternative to using Object.keys for old browsers
-function copyProps (src, dst) {
-  for (var key in src) {
-    dst[key] = src[key];
+function assertEncoding(encoding) {
+  if (encoding && !isBufferEncoding(encoding)) {
+    throw new Error('Unknown encoding: ' + encoding);
   }
-}
-if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
-  module.exports = bufferEs6;
-} else {
-  // Copy properties from require('buffer')
-  copyProps(bufferEs6, exports);
-  exports.Buffer = SafeBuffer;
-}
-
-function SafeBuffer (arg, encodingOrOffset, length) {
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-// Copy static methods from Buffer
-copyProps(Buffer, SafeBuffer);
-
-SafeBuffer.from = function (arg, encodingOrOffset, length) {
-  if (typeof arg === 'number') {
-    throw new TypeError('Argument must not be a number')
-  }
-  return Buffer(arg, encodingOrOffset, length)
-};
-
-SafeBuffer.alloc = function (size, fill, encoding) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  var buf = Buffer(size);
-  if (fill !== undefined) {
-    if (typeof encoding === 'string') {
-      buf.fill(fill, encoding);
-    } else {
-      buf.fill(fill);
-    }
-  } else {
-    buf.fill(0);
-  }
-  return buf
-};
-
-SafeBuffer.allocUnsafe = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return Buffer(size)
-};
-
-SafeBuffer.allocUnsafeSlow = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return bufferEs6.SlowBuffer(size)
-};
-});
-var safeBuffer_1 = safeBuffer.Buffer;
-
-var Buffer$1 = safeBuffer.Buffer;
-
-var isEncoding = Buffer$1.isEncoding || function (encoding) {
-  encoding = '' + encoding;
-  switch (encoding && encoding.toLowerCase()) {
-    case 'hex':case 'utf8':case 'utf-8':case 'ascii':case 'binary':case 'base64':case 'ucs2':case 'ucs-2':case 'utf16le':case 'utf-16le':case 'raw':
-      return true;
-    default:
-      return false;
-  }
-};
-
-function _normalizeEncoding(enc) {
-  if (!enc) return 'utf8';
-  var retried;
-  while (true) {
-    switch (enc) {
-      case 'utf8':
-      case 'utf-8':
-        return 'utf8';
-      case 'ucs2':
-      case 'ucs-2':
-      case 'utf16le':
-      case 'utf-16le':
-        return 'utf16le';
-      case 'latin1':
-      case 'binary':
-        return 'latin1';
-      case 'base64':
-      case 'ascii':
-      case 'hex':
-        return enc;
-      default:
-        if (retried) return; // undefined
-        enc = ('' + enc).toLowerCase();
-        retried = true;
-    }
-  }
-}
-// Do not cache `Buffer.isEncoding` when checking encoding names as some
-// modules monkey-patch it to support additional encodings
-function normalizeEncoding(enc) {
-  var nenc = _normalizeEncoding(enc);
-  if (typeof nenc !== 'string' && (Buffer$1.isEncoding === isEncoding || !isEncoding(enc))) throw new Error('Unknown encoding: ' + enc);
-  return nenc || enc;
 }
 
 // StringDecoder provides an interface for efficiently splitting a series of
 // buffers into a series of JS strings without breaking apart multi-byte
-// characters.
-var StringDecoder_1 = StringDecoder;
+// characters. CESU-8 is handled as part of the UTF-8 encoding.
+//
+// @TODO Handling all encodings inside a single object makes it very difficult
+// to reason about this code, so it should be split up in the future.
+// @TODO There should be a utf8-strict encoding that rejects invalid UTF-8 code
+// points as used by CESU-8.
 function StringDecoder(encoding) {
-  this.encoding = normalizeEncoding(encoding);
-  var nb;
+  this.encoding = (encoding || 'utf8').toLowerCase().replace(/[-_]/, '');
+  assertEncoding(encoding);
   switch (this.encoding) {
-    case 'utf16le':
-      this.text = utf16Text;
-      this.end = utf16End;
-      nb = 4;
-      break;
     case 'utf8':
-      this.fillLast = utf8FillLast;
-      nb = 4;
+      // CESU-8 represents each of Surrogate Pair by 3-bytes
+      this.surrogateSize = 3;
+      break;
+    case 'ucs2':
+    case 'utf16le':
+      // UTF-16 represents each of Surrogate Pair by 2-bytes
+      this.surrogateSize = 2;
+      this.detectIncompleteChar = utf16DetectIncompleteChar;
       break;
     case 'base64':
-      this.text = base64Text;
-      this.end = base64End;
-      nb = 3;
+      // Base-64 stores 3 bytes in 4 chars, and pads the remainder.
+      this.surrogateSize = 3;
+      this.detectIncompleteChar = base64DetectIncompleteChar;
       break;
     default:
-      this.write = simpleWrite;
-      this.end = simpleEnd;
+      this.write = passThroughWrite;
       return;
   }
-  this.lastNeed = 0;
-  this.lastTotal = 0;
-  this.lastChar = Buffer$1.allocUnsafe(nb);
+
+  // Enough space to store all bytes of a single character. UTF-8 needs 4
+  // bytes, but CESU-8 may require up to 6 (3 bytes per surrogate).
+  this.charBuffer = new Buffer(6);
+  // Number of bytes received for the current incomplete multi-byte character.
+  this.charReceived = 0;
+  // Number of bytes expected for the current incomplete multi-byte character.
+  this.charLength = 0;
 }
 
-StringDecoder.prototype.write = function (buf) {
-  if (buf.length === 0) return '';
-  var r;
-  var i;
-  if (this.lastNeed) {
-    r = this.fillLast(buf);
-    if (r === undefined) return '';
-    i = this.lastNeed;
-    this.lastNeed = 0;
-  } else {
-    i = 0;
+// write decodes the given buffer and returns it as JS string that is
+// guaranteed to not contain any partial multi-byte characters. Any partial
+// character found at the end of the buffer is buffered up, and will be
+// returned when calling write again with the remaining bytes.
+//
+// Note: Converting a Buffer containing an orphan surrogate to a String
+// currently works, but converting a String to a Buffer (via `new Buffer`, or
+// Buffer#write) will replace incomplete surrogates with the unicode
+// replacement character. See https://codereview.chromium.org/121173009/ .
+StringDecoder.prototype.write = function(buffer) {
+  var charStr = '';
+  // if our last write ended with an incomplete multibyte character
+  while (this.charLength) {
+    // determine how many remaining bytes this buffer has to offer for this char
+    var available = (buffer.length >= this.charLength - this.charReceived) ?
+        this.charLength - this.charReceived :
+        buffer.length;
+
+    // add the new bytes to the char buffer
+    buffer.copy(this.charBuffer, this.charReceived, 0, available);
+    this.charReceived += available;
+
+    if (this.charReceived < this.charLength) {
+      // still not enough chars in this buffer? wait for more ...
+      return '';
+    }
+
+    // remove bytes belonging to the current character from the buffer
+    buffer = buffer.slice(available, buffer.length);
+
+    // get the character that was split
+    charStr = this.charBuffer.slice(0, this.charLength).toString(this.encoding);
+
+    // CESU-8: lead surrogate (D800-DBFF) is also the incomplete character
+    var charCode = charStr.charCodeAt(charStr.length - 1);
+    if (charCode >= 0xD800 && charCode <= 0xDBFF) {
+      this.charLength += this.surrogateSize;
+      charStr = '';
+      continue;
+    }
+    this.charReceived = this.charLength = 0;
+
+    // if there are no more bytes in this buffer, just emit our char
+    if (buffer.length === 0) {
+      return charStr;
+    }
+    break;
   }
-  if (i < buf.length) return r ? r + this.text(buf, i) : this.text(buf, i);
-  return r || '';
+
+  // determine and set charLength / charReceived
+  this.detectIncompleteChar(buffer);
+
+  var end = buffer.length;
+  if (this.charLength) {
+    // buffer the incomplete character bytes we got
+    buffer.copy(this.charBuffer, 0, buffer.length - this.charReceived, end);
+    end -= this.charReceived;
+  }
+
+  charStr += buffer.toString(this.encoding, 0, end);
+
+  var end = charStr.length - 1;
+  var charCode = charStr.charCodeAt(end);
+  // CESU-8: lead surrogate (D800-DBFF) is also the incomplete character
+  if (charCode >= 0xD800 && charCode <= 0xDBFF) {
+    var size = this.surrogateSize;
+    this.charLength += size;
+    this.charReceived += size;
+    this.charBuffer.copy(this.charBuffer, size, 0, size);
+    buffer.copy(this.charBuffer, 0, 0, size);
+    return charStr.substring(0, end);
+  }
+
+  // or just emit the charStr
+  return charStr;
 };
 
-StringDecoder.prototype.end = utf8End;
+// detectIncompleteChar determines if there is an incomplete UTF-8 character at
+// the end of the given buffer. If so, it sets this.charLength to the byte
+// length that character, and sets this.charReceived to the number of bytes
+// that are available for this character.
+StringDecoder.prototype.detectIncompleteChar = function(buffer) {
+  // determine how many bytes we have to check at the end of this buffer
+  var i = (buffer.length >= 3) ? 3 : buffer.length;
 
-// Returns only complete characters in a Buffer
-StringDecoder.prototype.text = utf8Text;
+  // Figure out if one of the last i bytes of our buffer announces an
+  // incomplete char.
+  for (; i > 0; i--) {
+    var c = buffer[buffer.length - i];
 
-// Attempts to complete a partial non-UTF-8 character using bytes from a Buffer
-StringDecoder.prototype.fillLast = function (buf) {
-  if (this.lastNeed <= buf.length) {
-    buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, this.lastNeed);
-    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
+    // See http://en.wikipedia.org/wiki/UTF-8#Description
+
+    // 110XXXXX
+    if (i == 1 && c >> 5 == 0x06) {
+      this.charLength = 2;
+      break;
+    }
+
+    // 1110XXXX
+    if (i <= 2 && c >> 4 == 0x0E) {
+      this.charLength = 3;
+      break;
+    }
+
+    // 11110XXX
+    if (i <= 3 && c >> 3 == 0x1E) {
+      this.charLength = 4;
+      break;
+    }
   }
-  buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, buf.length);
-  this.lastNeed -= buf.length;
+  this.charReceived = i;
 };
 
-// Checks the type of a UTF-8 byte, whether it's ASCII, a leading byte, or a
-// continuation byte.
-function utf8CheckByte(byte) {
-  if (byte <= 0x7F) return 0;else if (byte >> 5 === 0x06) return 2;else if (byte >> 4 === 0x0E) return 3;else if (byte >> 3 === 0x1E) return 4;
-  return -1;
-}
+StringDecoder.prototype.end = function(buffer) {
+  var res = '';
+  if (buffer && buffer.length)
+    res = this.write(buffer);
 
-// Checks at most 3 bytes at the end of a Buffer in order to detect an
-// incomplete multi-byte UTF-8 character. The total number of bytes (2, 3, or 4)
-// needed to complete the UTF-8 character (if applicable) are returned.
-function utf8CheckIncomplete(self, buf, i) {
-  var j = buf.length - 1;
-  if (j < i) return 0;
-  var nb = utf8CheckByte(buf[j]);
-  if (nb >= 0) {
-    if (nb > 0) self.lastNeed = nb - 1;
-    return nb;
+  if (this.charReceived) {
+    var cr = this.charReceived;
+    var buf = this.charBuffer;
+    var enc = this.encoding;
+    res += buf.slice(0, cr).toString(enc);
   }
-  if (--j < i) return 0;
-  nb = utf8CheckByte(buf[j]);
-  if (nb >= 0) {
-    if (nb > 0) self.lastNeed = nb - 2;
-    return nb;
-  }
-  if (--j < i) return 0;
-  nb = utf8CheckByte(buf[j]);
-  if (nb >= 0) {
-    if (nb > 0) {
-      if (nb === 2) nb = 0;else self.lastNeed = nb - 3;
-    }
-    return nb;
-  }
-  return 0;
+
+  return res;
+};
+
+function passThroughWrite(buffer) {
+  return buffer.toString(this.encoding);
 }
 
-// Validates as many continuation bytes for a multi-byte UTF-8 character as
-// needed or are available. If we see a non-continuation byte where we expect
-// one, we "replace" the validated continuation bytes we've seen so far with
-// UTF-8 replacement characters ('\ufffd'), to match v8's UTF-8 decoding
-// behavior. The continuation byte check is included three times in the case
-// where all of the continuation bytes for a character exist in the same buffer.
-// It is also done this way as a slight performance increase instead of using a
-// loop.
-function utf8CheckExtraBytes(self, buf, p) {
-  if ((buf[0] & 0xC0) !== 0x80) {
-    self.lastNeed = 0;
-    return '\ufffd'.repeat(p);
-  }
-  if (self.lastNeed > 1 && buf.length > 1) {
-    if ((buf[1] & 0xC0) !== 0x80) {
-      self.lastNeed = 1;
-      return '\ufffd'.repeat(p + 1);
-    }
-    if (self.lastNeed > 2 && buf.length > 2) {
-      if ((buf[2] & 0xC0) !== 0x80) {
-        self.lastNeed = 2;
-        return '\ufffd'.repeat(p + 2);
-      }
-    }
-  }
+function utf16DetectIncompleteChar(buffer) {
+  this.charReceived = buffer.length % 2;
+  this.charLength = this.charReceived ? 2 : 0;
 }
 
-// Attempts to complete a multi-byte UTF-8 character using bytes from a Buffer.
-function utf8FillLast(buf) {
-  var p = this.lastTotal - this.lastNeed;
-  var r = utf8CheckExtraBytes(this, buf, p);
-  if (r !== undefined) return r;
-  if (this.lastNeed <= buf.length) {
-    buf.copy(this.lastChar, p, 0, this.lastNeed);
-    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
-  }
-  buf.copy(this.lastChar, p, 0, buf.length);
-  this.lastNeed -= buf.length;
-}
-
-// Returns all complete UTF-8 characters in a Buffer. If the Buffer ended on a
-// partial character, the character's bytes are buffered until the required
-// number of bytes are available.
-function utf8Text(buf, i) {
-  var total = utf8CheckIncomplete(this, buf, i);
-  if (!this.lastNeed) return buf.toString('utf8', i);
-  this.lastTotal = total;
-  var end = buf.length - (total - this.lastNeed);
-  buf.copy(this.lastChar, 0, end);
-  return buf.toString('utf8', i, end);
-}
-
-// For UTF-8, a replacement character for each buffered byte of a (partial)
-// character needs to be added to the output.
-function utf8End(buf) {
-  var r = buf && buf.length ? this.write(buf) : '';
-  if (this.lastNeed) return r + '\ufffd'.repeat(this.lastTotal - this.lastNeed);
-  return r;
-}
-
-// UTF-16LE typically needs two bytes per character, but even if we have an even
-// number of bytes available, we need to check if we end on a leading/high
-// surrogate. In that case, we need to wait for the next two bytes in order to
-// decode the last character properly.
-function utf16Text(buf, i) {
-  if ((buf.length - i) % 2 === 0) {
-    var r = buf.toString('utf16le', i);
-    if (r) {
-      var c = r.charCodeAt(r.length - 1);
-      if (c >= 0xD800 && c <= 0xDBFF) {
-        this.lastNeed = 2;
-        this.lastTotal = 4;
-        this.lastChar[0] = buf[buf.length - 2];
-        this.lastChar[1] = buf[buf.length - 1];
-        return r.slice(0, -1);
-      }
-    }
-    return r;
-  }
-  this.lastNeed = 1;
-  this.lastTotal = 2;
-  this.lastChar[0] = buf[buf.length - 1];
-  return buf.toString('utf16le', i, buf.length - 1);
-}
-
-// For UTF-16LE we do not explicitly append special replacement characters if we
-// end on a partial character, we simply let v8 handle that.
-function utf16End(buf) {
-  var r = buf && buf.length ? this.write(buf) : '';
-  if (this.lastNeed) {
-    var end = this.lastTotal - this.lastNeed;
-    return r + this.lastChar.toString('utf16le', 0, end);
-  }
-  return r;
-}
-
-function base64Text(buf, i) {
-  var n = (buf.length - i) % 3;
-  if (n === 0) return buf.toString('base64', i);
-  this.lastNeed = 3 - n;
-  this.lastTotal = 3;
-  if (n === 1) {
-    this.lastChar[0] = buf[buf.length - 1];
-  } else {
-    this.lastChar[0] = buf[buf.length - 2];
-    this.lastChar[1] = buf[buf.length - 1];
-  }
-  return buf.toString('base64', i, buf.length - n);
-}
-
-function base64End(buf) {
-  var r = buf && buf.length ? this.write(buf) : '';
-  if (this.lastNeed) return r + this.lastChar.toString('base64', 0, 3 - this.lastNeed);
-  return r;
-}
-
-// Pass bytes on through for single-byte encodings (e.g. ascii, latin1, hex)
-function simpleWrite(buf) {
-  return buf.toString(this.encoding);
-}
-
-function simpleEnd(buf) {
-  return buf && buf.length ? this.write(buf) : '';
+function base64DetectIncompleteChar(buffer) {
+  this.charReceived = buffer.length % 3;
+  this.charLength = this.charReceived ? 3 : 0;
 }
 
 Readable.ReadableState = ReadableState;
 
-var debug = util_3('stream');
-util_21(Readable, EventEmitter);
+var debug = debuglog('stream');
+inherits$1(Readable, EventEmitter);
 
 function prependListener(emitter, event, fn) {
   // Sadly this is not cacheable as some libraries bundle their own
@@ -24909,7 +24537,7 @@ function ReadableState(options, stream) {
   this.decoder = null;
   this.encoding = null;
   if (options.encoding) {
-    this.decoder = new StringDecoder_1(options.encoding);
+    this.decoder = new StringDecoder(options.encoding);
     this.encoding = options.encoding;
   }
 }
@@ -25016,7 +24644,7 @@ function needMoreData(state) {
 
 // backwards compatibility.
 Readable.prototype.setEncoding = function (enc) {
-  this._readableState.decoder = new StringDecoder_1(enc);
+  this._readableState.decoder = new StringDecoder(enc);
   this._readableState.encoding = enc;
   return this;
 };
@@ -25710,7 +25338,7 @@ function indexOf(xs, x) {
 
 // A bit simpler than readable streams.
 Writable.WritableState = WritableState;
-util_21(Writable, EventEmitter);
+inherits$1(Writable, EventEmitter);
 
 function nop() {}
 
@@ -25723,7 +25351,7 @@ function WriteReq(chunk, encoding, cb) {
 
 function WritableState(options, stream) {
   Object.defineProperty(this, 'buffer', {
-    get: util_2(function () {
+    get: deprecate(function () {
       return this.getBuffer();
     }, '_writableState.buffer is deprecated. Use _writableState.getBuffer ' + 'instead.')
   });
@@ -26181,7 +25809,7 @@ function CorkedRequest(state) {
   };
 }
 
-util_21(Duplex, Readable);
+inherits$1(Duplex, Readable);
 
 var keys = Object.keys(Writable.prototype);
 for (var v = 0; v < keys.length; v++) {
@@ -26220,7 +25848,7 @@ function onEndNT(self) {
 }
 
 // a transform stream is a readable/writable stream where you do
-util_21(Transform, Duplex);
+inherits$1(Transform, Duplex);
 
 function TransformState(stream) {
   this.afterTransform = function (er, data) {
@@ -26347,7 +25975,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-util_21(PassThrough, Transform);
+inherits$1(PassThrough, Transform);
 function PassThrough(options) {
   if (!(this instanceof PassThrough)) return new PassThrough(options);
 
@@ -26358,7 +25986,7 @@ PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-util_21(Stream, EventEmitter);
+inherits$1(Stream, EventEmitter);
 Stream.Readable = Readable;
 Stream.Writable = Writable;
 Stream.Duplex = Duplex;
@@ -26878,7 +26506,7 @@ var _cof = function(it){
   return toString$1.call(it).slice(8, -1);
 };
 
-var process$1            = _global.process
+var process            = _global.process
   , setTask            = _global.setImmediate
   , clearTask          = _global.clearImmediate
   , MessageChannel     = _global.MessageChannel
@@ -26912,9 +26540,9 @@ if(!setTask || !clearTask){
     delete queue$1[id];
   };
   // Node.js 0.8-
-  if(_cof(process$1) == 'process'){
+  if(_cof(process) == 'process'){
     defer = function(id){
-      process$1.nextTick(_ctx(run, id, 1));
+      process.nextTick(_ctx(run, id, 1));
     };
   // Browsers with MessageChannel, includes WebWorkers
   } else if(MessageChannel){
@@ -27018,7 +26646,7 @@ function nextTick$1() {
   draining$1 = false;
 }
 
-var browser$1 = immediate;
+var browser = immediate;
 function immediate(task) {
   if (queue$2.push(task) === 1 && !draining$1) {
     scheduleDrain();
@@ -27034,7 +26662,7 @@ var REJECTED = ['REJECTED'];
 var FULFILLED = ['FULFILLED'];
 var PENDING = ['PENDING'];
 
-var browser$2 = Promise$1;
+var browser$1 = Promise$1;
 
 function Promise$1(resolver) {
   if (typeof resolver !== 'function') {
@@ -27091,7 +26719,7 @@ QueueItem.prototype.otherCallRejected = function (value) {
 };
 
 function unwrap(promise, func, value) {
-  browser$1(function () {
+  browser(function () {
     var returnValue;
     try {
       returnValue = func(value);
@@ -27283,7 +26911,7 @@ var ES6Promise = null;
 if (typeof Promise !== "undefined") {
     ES6Promise = Promise;
 } else {
-    ES6Promise = browser$2;
+    ES6Promise = browser$1;
 }
 
 /**
@@ -29171,6 +28799,8 @@ var common_6 = common.Buf32;
 // 2. Altered source versions must be plainly marked as such, and must not be
 //   misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
+
+/* eslint-disable space-unary-ops */
 
 
 
@@ -31973,7 +31603,7 @@ function deflate(strm, flush) {
                     (!s.gzhead.extra ? 0 : 4) +
                     (!s.gzhead.name ? 0 : 8) +
                     (!s.gzhead.comment ? 0 : 16)
-                );
+        );
         put_byte(s, s.gzhead.time & 0xff);
         put_byte(s, (s.gzhead.time >> 8) & 0xff);
         put_byte(s, (s.gzhead.time >> 16) & 0xff);
@@ -32482,8 +32112,10 @@ var string2buf = function (str) {
 
 // Helper (used in 2 places)
 function buf2binstring(buf, len) {
-  // use fallback for big arrays to avoid stack overflow
-  if (len < 65537) {
+  // On Chrome, the arguments in a function call that are allowed is `65534`.
+  // If the length of the buffer is smaller than that, we can use this optimization,
+  // otherwise we will take a slower path.
+  if (len < 65534) {
     if ((buf.subarray && STR_APPLY_UIA_OK) || (!buf.subarray && STR_APPLY_OK)) {
       return String.fromCharCode.apply(null, common.shrinkBuf(buf, len));
     }
@@ -35546,6 +35178,22 @@ function Inflate(options) {
   this.header = new gzheader();
 
   inflate_1.inflateGetHeader(this.strm, this.header);
+
+  // Setup dictionary
+  if (opt.dictionary) {
+    // Convert data if needed
+    if (typeof opt.dictionary === 'string') {
+      opt.dictionary = strings.string2buf(opt.dictionary);
+    } else if (toString$3.call(opt.dictionary) === '[object ArrayBuffer]') {
+      opt.dictionary = new Uint8Array(opt.dictionary);
+    }
+    if (opt.raw) { //In raw mode we need to set the dictionary early
+      status = inflate_1.inflateSetDictionary(this.strm, opt.dictionary);
+      if (status !== constants.Z_OK) {
+        throw new Error(messages[status]);
+      }
+    }
+  }
 }
 
 /**
@@ -35582,7 +35230,6 @@ Inflate.prototype.push = function (data, mode) {
   var dictionary = this.options.dictionary;
   var status, _mode;
   var next_out_utf8, tail, utf8str;
-  var dict;
 
   // Flag to properly process Z_BUF_ERROR on testing inflate call
   // when we check that all output data was flushed.
@@ -35614,17 +35261,7 @@ Inflate.prototype.push = function (data, mode) {
     status = inflate_1.inflate(strm, constants.Z_NO_FLUSH);    /* no bad return value */
 
     if (status === constants.Z_NEED_DICT && dictionary) {
-      // Convert data if needed
-      if (typeof dictionary === 'string') {
-        dict = strings.string2buf(dictionary);
-      } else if (toString$3.call(dictionary) === '[object ArrayBuffer]') {
-        dict = new Uint8Array(dictionary);
-      } else {
-        dict = dictionary;
-      }
-
-      status = inflate_1.inflateSetDictionary(this.strm, dict);
-
+      status = inflate_1.inflateSetDictionary(this.strm, dictionary);
     }
 
     if (status === constants.Z_BUF_ERROR && allowBufError === true) {
@@ -36767,7 +36404,7 @@ var folderAdd = function(name, createFolders) {
 * @return {Boolean}        true if the object is a regular expression,
 * false otherwise
 */
-function isRegExp(object) {
+function isRegExp$1(object) {
     return Object.prototype.toString.call(object) === "[object RegExp]";
 }
 
@@ -36830,7 +36467,7 @@ var out = {
      */
     file: function(name, data, o) {
         if (arguments.length === 1) {
-            if (isRegExp(name)) {
+            if (isRegExp$1(name)) {
                 var regexp = name;
                 return this.filter(function(relativePath, file) {
                     return !file.dir && regexp.test(relativePath);
@@ -36862,7 +36499,7 @@ var out = {
             return this;
         }
 
-        if (isRegExp(arg)) {
+        if (isRegExp$1(arg)) {
             return this.filter(function(relativePath, file) {
                 return file.dir && arg.test(relativePath);
             });
@@ -37919,7 +37556,7 @@ function isNothing(subject) {
 }
 
 
-function isObject(subject) {
+function isObject$1(subject) {
   return (typeof subject === 'object') && (subject !== null);
 }
 
@@ -37965,7 +37602,7 @@ function isNegativeZero(number) {
 
 
 var isNothing_1      = isNothing;
-var isObject_1       = isObject;
+var isObject_1       = isObject$1;
 var toArray_1        = toArray;
 var repeat_1         = repeat;
 var isNegativeZero_1 = isNegativeZero;
@@ -38290,7 +37927,7 @@ function constructYamlNull() {
   return null;
 }
 
-function isNull(object) {
+function isNull$1(object) {
   return object === null;
 }
 
@@ -38298,7 +37935,7 @@ var _null = new type('tag:yaml.org,2002:null', {
   kind: 'scalar',
   resolve: resolveYamlNull,
   construct: constructYamlNull,
-  predicate: isNull,
+  predicate: isNull$1,
   represent: {
     canonical: function () { return '~';    },
     lowercase: function () { return 'null'; },
@@ -38323,7 +37960,7 @@ function constructYamlBoolean(data) {
          data === 'TRUE';
 }
 
-function isBoolean(object) {
+function isBoolean$1(object) {
   return Object.prototype.toString.call(object) === '[object Boolean]';
 }
 
@@ -38331,7 +37968,7 @@ var bool = new type('tag:yaml.org,2002:bool', {
   kind: 'scalar',
   resolve: resolveYamlBoolean,
   construct: constructYamlBoolean,
-  predicate: isBoolean,
+  predicate: isBoolean$1,
   represent: {
     lowercase: function (object) { return object ? 'true' : 'false'; },
     uppercase: function (object) { return object ? 'TRUE' : 'FALSE'; },
@@ -38984,7 +38621,7 @@ function representJavascriptUndefined() {
   return '';
 }
 
-function isUndefined(object) {
+function isUndefined$1(object) {
   return typeof object === 'undefined';
 }
 
@@ -38992,7 +38629,7 @@ var _undefined = new type('tag:yaml.org,2002:js/undefined', {
   kind: 'scalar',
   resolve: resolveJavascriptUndefined,
   construct: constructJavascriptUndefined,
-  predicate: isUndefined,
+  predicate: isUndefined$1,
   represent: representJavascriptUndefined
 });
 
@@ -39041,7 +38678,7 @@ function representJavascriptRegExp(object /*, style*/) {
   return result;
 }
 
-function isRegExp$1(object) {
+function isRegExp$2(object) {
   return Object.prototype.toString.call(object) === '[object RegExp]';
 }
 
@@ -39049,7 +38686,7 @@ var regexp = new type('tag:yaml.org,2002:js/regexp', {
   kind: 'scalar',
   resolve: resolveJavascriptRegExp,
   construct: constructJavascriptRegExp,
-  predicate: isRegExp$1,
+  predicate: isRegExp$2,
   represent: representJavascriptRegExp
 });
 
@@ -39124,7 +38761,7 @@ function representJavascriptFunction(object /*, style*/) {
   return object.toString();
 }
 
-function isFunction(object) {
+function isFunction$1(object) {
   return Object.prototype.toString.call(object) === '[object Function]';
 }
 
@@ -39132,7 +38769,7 @@ var _function = new type('tag:yaml.org,2002:js/function', {
   kind: 'scalar',
   resolve: resolveJavascriptFunction,
   construct: constructJavascriptFunction,
-  predicate: isFunction,
+  predicate: isFunction$1,
   represent: representJavascriptFunction
 });
 
@@ -44747,7 +44384,7 @@ return index;
 // Script modules can't expose exports
 try {
 	Tangram.debug.ESM = true; // mark build as ES module
-	Tangram.debug.SHA = '19530b0de3c6547f9e14bfb8efbd3489256e1276';
+	Tangram.debug.SHA = '0f399e60a1abc31008e1bb4f793fd1d2640d4268';
 	if (true === true && typeof window === 'object') {
 	    window.Tangram = Tangram;
 	}
