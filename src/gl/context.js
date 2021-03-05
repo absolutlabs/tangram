@@ -47,7 +47,7 @@ Context.getContext = function getContext (canvas, options)
 
 Context.resize = function (gl, width, height, device_pixel_ratio)
 {
-    device_pixel_ratio = device_pixel_ratio || 2. * window.devicePixelRatio || 1;
+    device_pixel_ratio = device_pixel_ratio || 1.5 * window.devicePixelRatio || 1;
     gl.canvas.style.width = width + 'px';
     gl.canvas.style.height = height + 'px';
     gl.canvas.width = Math.round(width * device_pixel_ratio);

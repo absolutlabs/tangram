@@ -2916,7 +2916,7 @@ Utils.use_high_density_display = true;
 
 Utils.updateDevicePixelRatio = function () {
   var prev = Utils.device_pixel_ratio;
-  Utils.device_pixel_ratio = 2. * (Utils.use_high_density_display && window.devicePixelRatio) || 1;
+  Utils.device_pixel_ratio = 1.5 * (Utils.use_high_density_display && window.devicePixelRatio) || 1;
   return Utils.device_pixel_ratio !== prev;
 };
 
@@ -25433,7 +25433,7 @@ Context.getContext = function getContext(canvas, options) {
 };
 
 Context.resize = function (gl, width, height, device_pixel_ratio) {
-  device_pixel_ratio = device_pixel_ratio || 2. * window.devicePixelRatio || 1;
+  device_pixel_ratio = device_pixel_ratio || 1.5 * window.devicePixelRatio || 1;
   gl.canvas.style.width = width + 'px';
   gl.canvas.style.height = height + 'px';
   gl.canvas.width = Math.round(width * device_pixel_ratio);
@@ -49349,7 +49349,7 @@ return index;
 // Script modules can't expose exports
 try {
 	Tangram.debug.ESM = false; // mark build as ES module
-	Tangram.debug.SHA = '1bfd94ec75d231e4dedbdc0b27d52ddd11ccf57e';
+	Tangram.debug.SHA = 'c9f796f35e55b1499f76c8ce90618e0cfacb493d';
 	if (false === true && typeof window === 'object') {
 	    window.Tangram = Tangram;
 	}
