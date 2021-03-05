@@ -67,7 +67,7 @@ function _extends() {
   return _extends.apply(this, arguments);
 }
 
-var version = "0.21.4";
+var version = "0.21.5";
 
 var version$1 = 'v' + version;
 
@@ -1792,23 +1792,18 @@ var GLSL = {};
     known texture names, or it could simply be used as a URL to dynamically load the texture from.
 */
 
-GLSL.parseUniforms = function (uniforms) {
+GLSL.parseUniforms = function (uniforms = {}) {
   var parsed = [];
 
-  for (var name in uniforms) {
-    var key = name; // save the original name
-
-    var uniform = uniforms[name];
-    var u; // Single float
-
+  for (const [name, uniform] of Object.entries(uniforms)) {
+    // Single float
     if (typeof uniform === 'number') {
       parsed.push({
         type: 'float',
         method: '1f',
         name,
         value: uniform,
-        key,
-        uniforms
+        path: [name]
       });
     } // Array: vector, array of floats, array of textures
     else if (Array.isArray(uniform)) {
@@ -1821,8 +1816,7 @@ GLSL.parseUniforms = function (uniforms) {
               method: uniform.length + 'fv',
               name,
               value: uniform,
-              key,
-              uniforms
+              path: [name]
             });
           } // float array
           else if (uniform.length > 4) {
@@ -1831,21 +1825,19 @@ GLSL.parseUniforms = function (uniforms) {
                 method: '1fv',
                 name: name + '[0]',
                 value: uniform,
-                key,
-                uniforms
+                path: [name]
               });
             } // TODO: assume matrix for (typeof == Float32Array && length == 16)?
 
         } // Array of textures
         else if (typeof uniform[0] === 'string') {
-            for (u = 0; u < uniform.length; u++) {
+            for (let u = 0; u < uniform.length; u++) {
               parsed.push({
                 type: 'sampler2D',
                 method: '1i',
                 name: name + '[' + u + ']',
                 value: uniform[u],
-                key: u,
-                uniforms: uniform
+                path: [name, u]
               });
             }
           } // Array of arrays - but only arrays of vectors are allowed in this case
@@ -1853,14 +1845,13 @@ GLSL.parseUniforms = function (uniforms) {
               // float vectors (vec2, vec3, vec4)
               if (uniform[0].length >= 2 && uniform[0].length <= 4) {
                 // Set each vector in the array
-                for (u = 0; u < uniform.length; u++) {
+                for (let u = 0; u < uniform.length; u++) {
                   parsed.push({
                     type: 'vec' + uniform[0].length,
                     method: uniform[0].length + 'fv',
                     name: name + '[' + u + ']',
                     value: uniform[u],
-                    key: u,
-                    uniforms: uniform
+                    path: [name, u]
                   });
                 }
               }
@@ -1873,8 +1864,7 @@ GLSL.parseUniforms = function (uniforms) {
             method: '1i',
             name,
             value: uniform,
-            key,
-            uniforms
+            path: [name]
           });
         } // Texture
         else if (typeof uniform === 'string') {
@@ -1883,8 +1873,7 @@ GLSL.parseUniforms = function (uniforms) {
               method: '1i',
               name,
               value: uniform,
-              key,
-              uniforms
+              path: [name]
             });
           }
   }
@@ -2372,18 +2361,19 @@ class ShaderProgram {
     } // Parse uniform types and values from the JS object
 
 
-    const parsed = GLSL.parseUniforms(uniforms); // Set each uniform
-
-    for (let u = 0; u < parsed.length; u++) {
-      const uniform = parsed[u];
-
-      if (uniform.type === 'sampler2D') {
+    GLSL.parseUniforms(uniforms).forEach(({
+      name,
+      type,
+      value,
+      method
+    }) => {
+      if (type === 'sampler2D') {
         // For textures, we need to track texture units, so we have a special setter
-        this.setTextureUniform(uniform.name, uniform.value);
+        this.setTextureUniform(name, value);
       } else {
-        this.uniform(uniform.method, uniform.name, uniform.value);
+        this.uniform(method, name, value);
       }
-    }
+    });
   } // Cache some or all uniform values so they can be restored
 
 
@@ -5443,8 +5433,8 @@ class DataSource {
     // than the current map zoom level – eg a zoom_offset of 1 would load z3 data at z4
 
     this.zoom_offset = config.zoom_offset != null ? config.zoom_offset : 0; // if (this.zoom_offset < 0) {
-    // let msg = `Data source '${this.name}' zoom_offset must not be negative – setting to 0.`;
-    // log({ level: 'warn', once: true }, msg);
+    //     let msg = `Data source '${this.name}' zoom_offset must not be negative – setting to 0.`;
+    //     log({ level: 'warn', once: true }, msg);
     //     this.zoom_offset = 0;
     // }
 
@@ -7207,13 +7197,15 @@ var Style = {
 
   // Set style uniforms on currently bound program
   setUniforms() {
+    var _this$shaders;
+
     var program = ShaderProgram.current;
 
     if (!program) {
       return;
     }
 
-    program.setUniforms(this.shaders && this.shaders.uniforms, true); // reset texture unit to 0
+    program.setUniforms((_this$shaders = this.shaders) == null ? void 0 : _this$shaders.uniforms, true); // reset texture unit to 0
   },
 
   // Render state settings by blend mode
@@ -40886,12 +40878,12 @@ const SceneLoader = {
           sources.GLSL.parseUniforms(style.shaders.uniforms).forEach(({
             type,
             value,
-            key
+            path
           }) => {
             // Texture by URL (string-named texture not referencing existing texture definition)
             if (type === 'sampler2D' && typeof value === 'string' && !config.textures[value]) {
-              const path = ['styles', sn, 'shaders', 'uniforms', key];
-              this.addTextureNode(path, bundle, texture_nodes);
+              const texture_path = ['styles', sn, 'shaders', 'uniforms', ...path];
+              this.addTextureNode(texture_path, bundle, texture_nodes);
             }
           });
         }
@@ -43330,7 +43322,9 @@ class Scene {
     let source = this.config.sources[name] = Object.assign({}, config); // Convert raw data into blob URL
 
     if (source.data && typeof source.data === 'object') {
-      source.url = sources.createObjectURL(new Blob([JSON.stringify(source.data)]));
+      source.url = sources.createObjectURL(new Blob([JSON.stringify(source.data)], {
+        type: 'application/json'
+      }));
       delete source.data;
     }
 
@@ -44384,7 +44378,7 @@ return index;
 // Script modules can't expose exports
 try {
 	Tangram.debug.ESM = true; // mark build as ES module
-	Tangram.debug.SHA = '0f399e60a1abc31008e1bb4f793fd1d2640d4268';
+	Tangram.debug.SHA = 'c6783249eb74e8c491c2ba3849adcf6c0910fa2d';
 	if (true === true && typeof window === 'object') {
 	    window.Tangram = Tangram;
 	}

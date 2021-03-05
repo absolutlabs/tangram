@@ -2003,7 +2003,7 @@ _export(_export.P + _export.F * _fails(function () {
   }
 });
 
-var version = "0.21.4";
+var version = "0.21.5";
 
 var version$1 = 'v' + version;
 
@@ -5020,22 +5020,25 @@ var GLSL = {};
 */
 
 GLSL.parseUniforms = function (uniforms) {
+  if (uniforms === void 0) {
+    uniforms = {};
+  }
+
   var parsed = [];
 
-  for (var name in uniforms) {
-    var key = name; // save the original name
+  for (var _i = 0, _Object$entries = Object.entries(uniforms); _i < _Object$entries.length; _i++) {
+    var _Object$entries$_i = _Object$entries[_i],
+        name = _Object$entries$_i[0],
+        uniform = _Object$entries$_i[1];
 
-    var uniform = uniforms[name];
-    var u; // Single float
-
+    // Single float
     if (typeof uniform === 'number') {
       parsed.push({
         type: 'float',
         method: '1f',
         name: name,
         value: uniform,
-        key: key,
-        uniforms: uniforms
+        path: [name]
       });
     } // Array: vector, array of floats, array of textures
     else if (Array.isArray(uniform)) {
@@ -5048,8 +5051,7 @@ GLSL.parseUniforms = function (uniforms) {
               method: uniform.length + 'fv',
               name: name,
               value: uniform,
-              key: key,
-              uniforms: uniforms
+              path: [name]
             });
           } // float array
           else if (uniform.length > 4) {
@@ -5058,21 +5060,19 @@ GLSL.parseUniforms = function (uniforms) {
                 method: '1fv',
                 name: name + '[0]',
                 value: uniform,
-                key: key,
-                uniforms: uniforms
+                path: [name]
               });
             } // TODO: assume matrix for (typeof == Float32Array && length == 16)?
 
         } // Array of textures
         else if (typeof uniform[0] === 'string') {
-            for (u = 0; u < uniform.length; u++) {
+            for (var u = 0; u < uniform.length; u++) {
               parsed.push({
                 type: 'sampler2D',
                 method: '1i',
                 name: name + '[' + u + ']',
                 value: uniform[u],
-                key: u,
-                uniforms: uniform
+                path: [name, u]
               });
             }
           } // Array of arrays - but only arrays of vectors are allowed in this case
@@ -5080,14 +5080,13 @@ GLSL.parseUniforms = function (uniforms) {
               // float vectors (vec2, vec3, vec4)
               if (uniform[0].length >= 2 && uniform[0].length <= 4) {
                 // Set each vector in the array
-                for (u = 0; u < uniform.length; u++) {
+                for (var _u = 0; _u < uniform.length; _u++) {
                   parsed.push({
                     type: 'vec' + uniform[0].length,
                     method: uniform[0].length + 'fv',
-                    name: name + '[' + u + ']',
-                    value: uniform[u],
-                    key: u,
-                    uniforms: uniform
+                    name: name + '[' + _u + ']',
+                    value: uniform[_u],
+                    path: [name, _u]
                   });
                 }
               }
@@ -5100,8 +5099,7 @@ GLSL.parseUniforms = function (uniforms) {
             method: '1i',
             name: name,
             value: uniform,
-            key: key,
-            uniforms: uniforms
+            path: [name]
           });
         } // Texture
         else if (typeof uniform === 'string') {
@@ -5110,8 +5108,7 @@ GLSL.parseUniforms = function (uniforms) {
               method: '1i',
               name: name,
               value: uniform,
-              key: key,
-              uniforms: uniforms
+              path: [name]
             });
           }
   }
@@ -5609,6 +5606,8 @@ var ShaderProgram = /*#__PURE__*/function () {
   ;
 
   _proto.setUniforms = function setUniforms(uniforms, reset_texture_unit) {
+    var _this2 = this;
+
     if (reset_texture_unit === void 0) {
       reset_texture_unit = true;
     }
@@ -5627,18 +5626,19 @@ var ShaderProgram = /*#__PURE__*/function () {
     } // Parse uniform types and values from the JS object
 
 
-    var parsed = GLSL.parseUniforms(uniforms); // Set each uniform
+    GLSL.parseUniforms(uniforms).forEach(function (_ref2) {
+      var name = _ref2.name,
+          type = _ref2.type,
+          value = _ref2.value,
+          method = _ref2.method;
 
-    for (var u = 0; u < parsed.length; u++) {
-      var uniform = parsed[u];
-
-      if (uniform.type === 'sampler2D') {
+      if (type === 'sampler2D') {
         // For textures, we need to track texture units, so we have a special setter
-        this.setTextureUniform(uniform.name, uniform.value);
+        _this2.setTextureUniform(name, value);
       } else {
-        this.uniform(uniform.method, uniform.name, uniform.value);
+        _this2.uniform(method, name, value);
       }
-    }
+    });
   } // Cache some or all uniform values so they can be restored
   ;
 
@@ -5899,13 +5899,13 @@ var ShaderProgram = /*#__PURE__*/function () {
   ;
 
   _proto.checkExtensions = function checkExtensions() {
-    var _this2 = this;
+    var _this3 = this;
 
     var exts = [];
     this.extensions.forEach(function (name) {
-      var ext = getExtension(_this2.gl, name);
+      var ext = getExtension(_this3.gl, name);
       var def = "TANGRAM_EXTENSION_" + name;
-      _this2.defines[def] = ext != null;
+      _this3.defines[def] = ext != null;
 
       if (ext) {
         exts.push(name);
@@ -9056,8 +9056,8 @@ var DataSource = /*#__PURE__*/function () {
     // than the current map zoom level – eg a zoom_offset of 1 would load z3 data at z4
 
     this.zoom_offset = config.zoom_offset != null ? config.zoom_offset : 0; // if (this.zoom_offset < 0) {
-    // let msg = `Data source '${this.name}' zoom_offset must not be negative – setting to 0.`;
-    // log({ level: 'warn', once: true }, msg);
+    //     let msg = `Data source '${this.name}' zoom_offset must not be negative – setting to 0.`;
+    //     log({ level: 'warn', once: true }, msg);
     //     this.zoom_offset = 0;
     // }
 
@@ -10928,13 +10928,15 @@ var Style = {
   },
   // Set style uniforms on currently bound program
   setUniforms: function setUniforms() {
+    var _this$shaders;
+
     var program = ShaderProgram.current;
 
     if (!program) {
       return;
     }
 
-    program.setUniforms(this.shaders && this.shaders.uniforms, true); // reset texture unit to 0
+    program.setUniforms((_this$shaders = this.shaders) == null ? void 0 : _this$shaders.uniforms, true); // reset texture unit to 0
   },
   // Render state settings by blend mode
   render_states: {
@@ -45471,13 +45473,13 @@ var SceneLoader = {
           sources.GLSL.parseUniforms(style.shaders.uniforms).forEach(function (_ref3) {
             var type = _ref3.type,
                 value = _ref3.value,
-                key = _ref3.key;
+                path = _ref3.path;
 
             // Texture by URL (string-named texture not referencing existing texture definition)
             if (type === 'sampler2D' && typeof value === 'string' && !config.textures[value]) {
-              var path = ['styles', _sn, 'shaders', 'uniforms', key];
+              var texture_path = ['styles', _sn, 'shaders', 'uniforms'].concat(path);
 
-              _this3.addTextureNode(path, bundle, texture_nodes);
+              _this3.addTextureNode(texture_path, bundle, texture_nodes);
             }
           });
         }
@@ -48219,7 +48221,9 @@ var Scene = /*#__PURE__*/function () {
     var source = this.config.sources[name] = Object.assign({}, config); // Convert raw data into blob URL
 
     if (source.data && typeof source.data === 'object') {
-      source.url = sources.createObjectURL(new Blob([JSON.stringify(source.data)]));
+      source.url = sources.createObjectURL(new Blob([JSON.stringify(source.data)], {
+        type: 'application/json'
+      }));
       delete source.data;
     }
 
@@ -49345,7 +49349,7 @@ return index;
 // Script modules can't expose exports
 try {
 	Tangram.debug.ESM = false; // mark build as ES module
-	Tangram.debug.SHA = '0f399e60a1abc31008e1bb4f793fd1d2640d4268';
+	Tangram.debug.SHA = 'c6783249eb74e8c491c2ba3849adcf6c0910fa2d';
 	if (false === true && typeof window === 'object') {
 	    window.Tangram = Tangram;
 	}
